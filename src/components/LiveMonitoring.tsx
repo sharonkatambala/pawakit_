@@ -24,6 +24,8 @@ interface Device {
   status: "normal" | "alert";
   previousPower: number;
   ppm: number;
+  serialNumber?: string;
+  modelNumber?: string;
   simulatedData?: SimulatedData;
 }
 

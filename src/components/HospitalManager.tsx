@@ -33,6 +33,8 @@ interface Device {
   status: 'normal' | 'alert';
   previousPower: number;
   ppm: number;
+  serialNumber?: string;
+  modelNumber?: string;
   simulatedData?: SimulatedData;
 }
 
@@ -65,11 +67,14 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
     count: 1,
     category: "lifesaving" as "lifesaving" | "lab" | "general",
     sourceType: "Grid",
+    serialNumber: "",
+    modelNumber: "",
   });
   const [isAddHospitalOpen, setIsAddHospitalOpen] = useState(false);
   const [isAddWardOpen, setIsAddWardOpen] = useState(false);
   const [newHospital, setNewHospital] = useState({ name: '', address: '', contact: '' });
   const [newWard, setNewWard] = useState({ name: '' });
+  const [expandedWard, setExpandedWard] = useState<number | null>(null);
 
   // Set the first hospital as selected by default
   useEffect(() => {
@@ -161,6 +166,16 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
       return;
     }
 
+    if (!newDevice.serialNumber.trim()) {
+      toast.error('Serial number is required');
+      return;
+    }
+
+    if (!newDevice.modelNumber.trim()) {
+      toast.error('Model number is required');
+      return;
+    }
+
     const powerUsage = Math.round(25 + Math.random() * 55);
     const device: Device = {
       id: Date.now(),
@@ -173,6 +188,8 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
       status: 'normal',
       previousPower: powerUsage,
       ppm: Math.round(50 + Math.random() * 200),
+      serialNumber: newDevice.serialNumber.trim(),
+      modelNumber: newDevice.modelNumber.trim(),
     };
 
     const updatedHospitals = hospitals.map(hospital => ({
@@ -189,9 +206,9 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
     }));
 
     setHospitals(updatedHospitals);
-    setNewDevice({ name: '', count: 1, category: 'lifesaving', sourceType: 'Grid' });
+    setNewDevice({ name: '', count: 1, category: 'lifesaving', sourceType: 'Grid', serialNumber: '', modelNumber: '' });
     setIsAddDeviceOpen(false);
-    toast.success('Device added. Live demo metrics will start updating.');
+    toast.success('Device added successfully with serial and model numbers.');
   };
 
   const handleRemoveWard = (wardId: number) => {
@@ -442,14 +459,9 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
         <TabsContent value="devices">
           {selectedHospital && (
             <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                <h3 className="text-lg font-medium">Devices in {formatHospitalName(selectedHospital.name)}</h3>
-                <p className="text-sm text-muted-foreground">View and manage devices across all wards in {formatHospitalName(selectedHospital.name)}. Add devices to measure voltage, current, temperature and power — these metrics are simulated for demo and will appear once a device is added.</p>
-                </div>
-                <div className="pt-1">
-                  <Link to="/docs/devices" className="text-sm text-muted-foreground hover:text-foreground">Learn more</Link>
-                </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-medium">Device Management</h3>
+                <p className="text-sm text-muted-foreground">Select a ward to view and manage devices. Add serial numbers and model numbers during device registration.</p>
               </div>
 
               {selectedHospital.wards.length === 0 ? (
@@ -457,94 +469,102 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                   <p className="text-muted-foreground">No wards found. Add a ward first.</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {selectedHospital.wards.map((ward) => (
-                    <div key={ward.id} className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">{ward.name}</div>
-                          <div className="text-sm text-muted-foreground">{ward.devices.length} devices</div>
+                    <Card key={ward.id} className="overflow-hidden">
+                      <div 
+                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={() => setExpandedWard(expandedWard === ward.id ? null : ward.id)}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <Building className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{ward.name}</p>
+                            <p className="text-sm text-muted-foreground">{ward.devices.length} device{ward.devices.length !== 1 ? 's' : ''}</p>
+                          </div>
                         </div>
                         <Button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setSelectedWard(ward);
                             setIsAddDeviceOpen(true);
                           }}
+                          size="sm"
+                          className="mr-2"
                         >
-                          <Plus className="mr-2 h-4 w-4" />
+                          <Plus className="h-4 w-4 mr-1" />
                           Add Device
                         </Button>
+                        <svg
+                          className={`h-5 w-5 text-muted-foreground transition-transform ${expandedWard === ward.id ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
                       </div>
 
-                      {ward.devices.length === 0 ? (
-                        <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                          No devices in this ward yet.
-                        </div>
-                      ) : (
-                        <div className="grid gap-4">
+                      {expandedWard === ward.id && ward.devices.length > 0 && (
+                        <div className="border-t px-4 py-3 space-y-3 bg-muted/30">
                           {ward.devices.map((device) => (
-                            <Card key={device.id}>
-                              <CardHeader className="pb-2">
+                            <Card key={device.id} className="border bg-background">
+                              <CardHeader className="pb-3">
                                 <div className="flex justify-between items-start gap-3">
-                                  <div>
-                                    <CardTitle className="text-lg">{device.name}</CardTitle>
-                                    <CardDescription>
-                                      {device.count} units • {device.sourceType}
+                                  <div className="flex-1">
+                                    <CardTitle className="text-base">{device.name}</CardTitle>
+                                    <CardDescription className="mt-1">
+                                      {device.count} unit{device.count !== 1 ? 's' : ''}
                                     </CardDescription>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant={device.status === 'alert' ? 'destructive' : 'default'}>
-                                      {device.status}
-                                    </Badge>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => handleRemoveDeviceFromWard(ward.id, device.id)}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
+                                  <Badge variant={device.status === 'alert' ? 'destructive' : 'default'}>
+                                    {device.status}
+                                  </Badge>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                  <Badge variant="outline">{device.category}</Badge>
-                                  {device.simulatedData && (
-                                    <Badge variant="outline">{device.simulatedData.riskLevel}</Badge>
-                                  )}
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs">{device.category}</Badge>
+                                  <Badge variant="outline" className="text-xs">{device.sourceType}</Badge>
                                 </div>
                               </CardHeader>
-                              <CardContent>
-                                {device.simulatedData ? (
-                                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
-                                    <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4">
-                                      <div className="text-sm text-muted-foreground">Voltage</div>
-                                      <div className="text-2xl font-semibold">{device.simulatedData.voltage}V</div>
+                              <CardContent className="space-y-3">
+                                <div className="grid grid-cols-2 gap-4 text-sm border-b pb-3">
+                                  {device.serialNumber && (
+                                    <div>
+                                      <p className="text-muted-foreground text-xs font-medium mb-1">Serial Number</p>
+                                      <p className="font-mono font-semibold text-foreground">{device.serialNumber}</p>
                                     </div>
-                                    <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
-                                      <div className="text-sm text-muted-foreground">Current</div>
-                                      <div className="text-2xl font-semibold">{device.simulatedData.current}A</div>
+                                  )}
+                                  {device.modelNumber && (
+                                    <div>
+                                      <p className="text-muted-foreground text-xs font-medium mb-1">Model Number</p>
+                                      <p className="font-mono font-semibold text-foreground">{device.modelNumber}</p>
                                     </div>
-                                    <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
-                                      <div className="text-sm text-muted-foreground">Temperature</div>
-                                      <div className="text-2xl font-semibold">{device.simulatedData.temperature}°C</div>
-                                    </div>
-                                    <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4">
-                                      <div className="text-sm text-muted-foreground">Power</div>
-                                      <div className="text-2xl font-semibold">{device.simulatedData.power}W</div>
-                                    </div>
-                                    <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-4">
-                                      <div className="text-sm text-muted-foreground">Price/kWh</div>
-                                      <div className="text-2xl font-semibold">{device.simulatedData.pricePerUnitTZS} TZS</div>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="text-sm text-muted-foreground">Starting demo simulation…</div>
-                                )}
+                                  )}
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1"
+                                    onClick={() => handleRemoveDeviceFromWard(ward.id, device.id)}
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Remove
+                                  </Button>
+                                </div>
                               </CardContent>
                             </Card>
                           ))}
                         </div>
                       )}
-                    </div>
+
+                      {expandedWard === ward.id && ward.devices.length === 0 && (
+                        <div className="border-t px-4 py-4 text-center text-sm text-muted-foreground bg-muted/30">
+                          No devices in this ward yet.
+                        </div>
+                      )}
+                    </Card>
                   ))}
                 </div>
               )}
@@ -567,6 +587,7 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 id="hospitalName2"
                 value={newHospital.name}
                 onChange={(e) => setNewHospital({ ...newHospital, name: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddHospital()}
                 className="col-span-3"
                 placeholder="Enter hospital name"
               />
@@ -579,6 +600,7 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 id="hospitalAddress2"
                 value={newHospital.address}
                 onChange={(e) => setNewHospital({ ...newHospital, address: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddHospital()}
                 className="col-span-3"
                 placeholder="Enter hospital address"
               />
@@ -591,6 +613,7 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 id="hospitalContact2"
                 value={newHospital.contact}
                 onChange={(e) => setNewHospital({ ...newHospital, contact: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddHospital()}
                 className="col-span-3"
                 placeholder="Enter contact information"
               />
@@ -621,6 +644,7 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 id="wardName"
                 value={newWard.name}
                 onChange={(e) => setNewWard({ name: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddWard()}
                 className="col-span-3"
                 placeholder="Enter ward name"
               />
@@ -642,8 +666,9 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
           <DialogHeader>
             <DialogTitle>Add New Device</DialogTitle>
           </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <p className="text-sm text-muted-foreground">Add a device to {selectedHospital ? formatHospitalName(selectedHospital.name) : 'the selected hospital'}. Choose a category that best describes the device's use (Life-saving, Laboratory, or General Support) and the primary power source.</p>
+          <div className="grid gap-4 py-4">
+            <p className="text-sm text-muted-foreground">Add a device to {selectedWard ? `${selectedWard.name} ward` : 'the selected ward'}. All device details will be saved in the database.</p>
+            
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="deviceName2" className="text-right">
                 Name *
@@ -652,10 +677,40 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 id="deviceName2"
                 value={newDevice.name}
                 onChange={(e) => setNewDevice({ ...newDevice, name: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddDevice()}
                 className="col-span-3"
-                placeholder="Enter device name"
+                placeholder="e.g., ICU Monitor"
               />
             </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="serialNumber" className="text-right">
+                Serial # *
+              </Label>
+              <Input
+                id="serialNumber"
+                value={newDevice.serialNumber}
+                onChange={(e) => setNewDevice({ ...newDevice, serialNumber: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddDevice()}
+                className="col-span-3"
+                placeholder="e.g., SN-2025-001"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="modelNumber" className="text-right">
+                Model # *
+              </Label>
+              <Input
+                id="modelNumber"
+                value={newDevice.modelNumber}
+                onChange={(e) => setNewDevice({ ...newDevice, modelNumber: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddDevice()}
+                className="col-span-3"
+                placeholder="e.g., M-5000-X"
+              />
+            </div>
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="deviceCount" className="text-right">
                 Count
@@ -666,9 +721,11 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 min="1"
                 value={newDevice.count}
                 onChange={(e) => setNewDevice({ ...newDevice, count: parseInt(e.target.value) || 1 })}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddDevice()}
                 className="col-span-3"
               />
             </div>
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Category</Label>
               <div className="col-span-3">
@@ -689,6 +746,7 @@ export const HospitalManager = ({ hospitals, setHospitals }: HospitalManagerProp
                 </Select>
               </div>
             </div>
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Power Source</Label>
               <div className="col-span-3">

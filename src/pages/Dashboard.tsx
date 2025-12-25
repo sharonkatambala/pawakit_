@@ -37,6 +37,8 @@ interface Device {
   status: 'normal' | 'alert';
   previousPower: number;
   ppm: number;
+  serialNumber?: string;
+  modelNumber?: string;
   simulatedData?: SimulatedData;
 }
 
@@ -294,9 +296,6 @@ const Dashboard = () => {
               <p className="text-xl text-muted-foreground max-w-2xl">
                 Monitor and manage your hospital's energy infrastructure in real-time
               </p>
-              <div className="mt-4">
-                <Link to="/docs/overview" className="text-sm text-primary font-medium">Learn more about PAWAKIT</Link>
-              </div>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
