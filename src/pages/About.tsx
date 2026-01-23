@@ -25,7 +25,7 @@ const About = () => {
     },
     {
       name: "Sharon Katambala",
-      title: "AI Systems Architect",
+      title: "AI & IoT Systems Lead",
       image: "/lovable-uploads/dina-ngiga.png"
     },
     {
