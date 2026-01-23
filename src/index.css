@@ -1,0 +1,326 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 23% 6%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 23% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 23% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 45 100% 51%;
+    --primary-foreground: 220 23% 6%;
+
+    --secondary: 220 23% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 23% 16%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 45 100% 51%;
+    --accent-foreground: 220 23% 6%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 23% 20%;
+    --input: 220 23% 20%;
+    --ring: 45 100% 51%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 220 23% 8%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 45 100% 51%;
+    --sidebar-primary-foreground: 220 23% 6%;
+    --sidebar-accent: 220 23% 12%;
+    --sidebar-accent-foreground: 0 0% 88%;
+    --sidebar-border: 220 23% 20%;
+    --sidebar-ring: 45 100% 51%;
+
+    /* New modern color variables */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 23% 6%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 98%;
+  }
+
+  .dark {
+    --background: 220 23% 6%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 23% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 23% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 45 100% 51%;
+    --primary-foreground: 220 23% 6%;
+
+    --secondary: 220 23% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 23% 16%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 45 100% 51%;
+    --accent-foreground: 220 23% 6%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 23% 20%;
+    --input: 220 23% 20%;
+    --ring: 45 100% 51%;
+    --sidebar-background: 220 23% 8%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 45 100% 51%;
+    --sidebar-primary-foreground: 220 23% 6%;
+    --sidebar-accent: 220 23% 12%;
+    --sidebar-accent-foreground: 0 0% 88%;
+    --sidebar-border: 220 23% 20%;
+    --sidebar-ring: 45 100% 51%;
+
+    /* New modern color variables */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 23% 6%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Modern scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+/* Custom gradient backgrounds and modern effects */
+@layer utilities {
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(45 100% 45%) 100%);
+  }
+  
+  .bg-gradient-accent {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(45 100% 65%) 100%);
+  }
+
+  .bg-gradient-hero {
+    background: linear-gradient(135deg, hsl(220 23% 6%) 0%, hsl(220 23% 12%) 50%, hsl(45 100% 20%) 100%);
+  }
+
+  .bg-gradient-card {
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(220 23% 10%) 100%);
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(142 76% 45%) 100%);
+  }
+
+  .bg-gradient-warning {
+    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(38 92% 60%) 100%);
+  }
+
+  .bg-gradient-danger {
+    background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(0 84% 70%) 100%);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(45 100% 65%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-success {
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(142 76% 45%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-warning {
+    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(38 92% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glassmorphism effects */
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Modern shadows */
+  .shadow-modern {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+  }
+
+  .shadow-glow-primary {
+    box-shadow: 0 0 30px rgba(255, 193, 7, 0.4);
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out;
+  }
+
+  /* Hover effects */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+  }
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Modern focus states */
+.focus-ring:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Gradient text utilities */
+.gradient-text-primary {
+  @apply text-gradient;
+}
+
+.gradient-text-success {
+  @apply text-gradient-success;
+}
+
+.gradient-text-warning {
+  @apply text-gradient-warning;
+}
